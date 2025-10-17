@@ -1,0 +1,24 @@
+# Development override for docker-compose
+# Use with: docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
+# Or simply: make dev
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: dev.Dockerfile
+    # Mount source code as volume for hot reload
+    volumes:
+      - .:/app
+      # Exclude tmp directory (Air builds here)
+      - /app/tmp
+      # Exclude vendor directory
+      - /app/vendor
+    # Override command to use Air
+    command: /go/bin/air -c .air.toml
+    # Development environment variables can override here if needed
+    environment:
+      PORT: ${PORT}
+      DATABASE_URL: postgres://${DB_USER}:${DB_PASSWORD}@postgres:5432/${DB_NAME}?sslmode=disable
+      ENVIRONMENT: development
+      LOG_LEVEL: debug

@@ -1,0 +1,50 @@
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: crawlly-postgres
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "${DB_PORT}:5432"
+    volumes:
+      - crawlly_postgres_data:/var/lib/postgresql/data
+      - ./migrations:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - crawlly-network
+
+  # Go Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: crawlly-app
+    environment:
+      PORT: ${PORT}
+      # Inside Docker network, use 'postgres' as host and internal port 5432
+      DATABASE_URL: postgres://${DB_USER}:${DB_PASSWORD}@postgres:5432/${DB_NAME}?sslmode=disable
+      ENVIRONMENT: ${ENVIRONMENT}
+      LOG_LEVEL: ${LOG_LEVEL}
+    ports:
+      - "${PORT}:${PORT}"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - crawlly-network
+    restart: unless-stopped
+
+volumes:
+  crawlly_postgres_data:
+    name: crawlly_postgres_data
+
+networks:
+  crawlly-network:
+    driver: bridge

@@ -1,0 +1,50 @@
+# Git
+.git
+.gitignore
+
+# Documentation
+*.md
+!README.md
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+bin/
+dist/
+build/
+
+# Dependencies (will be downloaded in Docker)
+vendor/
+
+# Environment files
+.env
+.env.*
+
+# Docker files (don't need these in the image)
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Logs
+*.log
+
+# Test files
+*_test.go
+
+# Temporary files
+tmp/
+temp/
+
+# Air hot reload artifacts
+build-errors.log
+
+# Note: For development with hot reload, source files ARE included
+# The dev Dockerfile mounts them as volumes anyway
